@@ -55,9 +55,17 @@
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    // Инициализируем объект Telegram
+    let tg = null;
+    try {
+        if (window.Telegram && window.Telegram.WebApp) {
+            tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+        }
+    } catch (e) {
+        console.error("Ошибка инициализации Telegram API:", e);
+    }
 
     document.getElementById('submit-btn').addEventListener('click', function() {
         const nameInput = document.getElementById('name');
@@ -84,28 +92,41 @@
         if (!isValid) return;
 
        
-        const n8nWebhookUrl = "https://rebirth-eliminate-residency.ngrok-free.dev/webhook/19b7c2d5-f2e6-483c-b67f-fb10f1e44f47";
+        const n8nWebhookUrl = "https://rebirth-eliminate-residency.ngrok-free.dev/webhook-test/19b7c2d5-f2e6-483c-b67f-fb10f1e44f47";
 
-        // Отправляем чистый JSON-пакет по интернету напрямую в n8n!
+        // Сверхбезопасный сбор Telegram ID чата
+        let userId = "1710015849"; // Твой админский ID по умолчанию
+        try {
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                userId = tg.initDataUnsafe.user.id.toString();
+            }
+        } catch (e) {
+            console.log("Защита сработала, используем дефолтный ID");
+        }
+
+        const payload = {
+            tg_id: userId,
+            name: nameInput.value.trim(),
+            phone: cleanPhone
+        };
+
+        // Отправляем запрос через fetch с защитой от зависания
         fetch(n8nWebhookUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                tg_id: tg.initDataUnsafe?.user?.id || "1710015849", // Если ID не определился, подставим твой
-                name: nameInput.value.trim(),
-                phone: cleanPhone
-            })
+            body: JSON.stringify(payload)
         })
         .then(() => {
-            // Кнопка больше никогда не зависнет! Форма принудительно закрывается со щелчком!
-            tg.close();
+            // Если все ок — закрываем форму со щелчком
+            if (tg) tg.close();
         })
         .catch(err => {
-            console.error(err);
-            // Если ngrok временно спит, всё равно закрываем форму, чтобы не бесить юзера
-            tg.close();
+            console.error("Ошибка отправки сетевого запроса:", err);
+            // Если сеть затупила, всё равно принудительно гасим форму, чтобы кнопка отжалась
+            if (tg) tg.close();
         });
     });
 </script>
 </body>
 </html>
+
