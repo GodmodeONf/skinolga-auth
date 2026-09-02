@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация SkinOlga</title>
+    <!-- Подключаем официальный скрипт Telegram WebApp -->
+    <script src="https://telegram.org"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+        .form-container {
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+        }
+        h2 { margin-bottom: 10px; color: var(--tg-theme-button-color, #2481cc); }
+        p { font-size: 14px; color: #888; margin-bottom: 25px; }
+        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 12px; margin-bottom: 5px; font-weight: bold; color: var(--tg-theme-hint-color, #999); }
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid var(--tg-theme-hint-color, #ccc);
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+        }
+        input:focus { outline: none; border-color: var(--tg-theme-button-color, #2481cc); }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Авторизация</h2>
+    <p>Пожалуйста, подтвердите свой профиль для доступа к системе SkinOlga</p>
+    
+    <div class="input-group">
+        <label for="name">Ваше имя</label>
+        <input type="text" id="name" placeholder="Иван" required>
+    </div>
+
+    <div class="input-group">
+        <label for="phone">Номер телефона</label>
+        <input type="tel" id="phone" placeholder="+7 (999) 999-99-99" required>
+    </div>
+
+    <button class="btn" onclick="sendData()">Подтвердить профиль</button>
+</div>
+
+<script>
+    // Инициализируем Telegram WebApp API
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Раскрываем приложение на весь экран телефона
+
+    function sendData() {
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+
+        if (!name || !phone) {
+            alert('Пожалуйста, заполните все поля!');
+            return;
+        }
+
+        // Собираем чистый JSON-пакет данных
+        const webAppData = {
+            tg_id: tg.initDataUnsafe?.user?.id || "unknown",
+            name: name,
+            phone: phone
+        };
+
+        // Отправляем данные обратно в n8n через системный метод Telegram
+        tg.sendData(JSON.stringify(webAppData));
+        
+        // Закрываем мини-приложение на телефоне
+        tg.close();
+    }
+</script>
+</body>
+</html>
