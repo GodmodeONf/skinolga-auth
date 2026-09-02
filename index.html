@@ -111,21 +111,25 @@
         };
 
         // Отправляем запрос через fetch с защитой от зависания
-        fetch(n8nWebhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(() => {
-            // Если все ок — закрываем форму со щелчком
-            if (tg) tg.close();
-        })
-        .catch(err => {
-            console.error("Ошибка отправки сетевого запроса:", err);
-            // Если сеть затупила, всё равно принудительно гасим форму, чтобы кнопка отжалась
-            if (tg) tg.close();
-        });
-    });
+        // Находим блок fetch(n8nWebhookUrl, { ... }) и меняем его настройки:
+fetch(n8nWebhookUrl, {
+    method: 'POST',
+    headers: { 
+        'Content-Type': 'application/json',
+        // 🚨 БРОНЕБОЙНЫЙ ХЕДЕР: Приказывает ngrok не блокировать запрос формой!
+        'ngrok-skip-browser-warning': 'true'
+    },
+    body: JSON.stringify(payload)
+})
+.then(() => {
+    // Теперь запрос успешно улетит в Docker, и форма мгновенно закроется!
+    if (tg) tg.close();
+})
+.catch(err => {
+    console.error("Ошибка отправки сетевого запроса:", err);
+    // Если сеть затупила, всё равно принудительно гасим форму, чтобы кнопка отжалась
+    if (tg) tg.close();
+});
 </script>
 </body>
 </html>
