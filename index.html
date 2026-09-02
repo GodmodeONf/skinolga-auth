@@ -76,30 +76,28 @@
 <script>
     // Инициализируем Telegram WebApp API
     const tg = window.Telegram.WebApp;
-    tg.expand(); // Раскрываем приложение на весь экран телефона
+tg.ready(); // ОБЯЗАТЕЛЬНО: Сообщаем Telegram, что приложение успешно загрузилось!
+tg.expand(); // Раскрываем приложение на весь экран телефона
 
-        function sendData() {
+function sendData() {
     const name = document.getElementById('name').value.trim();
     const phone = document.getElementById('phone').value.trim();
 
     if (!name || !phone) {
-        alert('Пожалуйста, заполните все поля!');
+        alert('Пожалуйста, заполни все поля!');
         return;
     }
 
-    // Очищаем телефон от скобок и пробелов перед отправкой, оставляя только цифры
     const cleanPhone = phone.replace(/\D/g, '');
 
-    // Собираем чистую строку данных
     const webAppData = {
         name: name,
         phone: cleanPhone
     };
 
-    // Обязательно превращаем объект в ТЕКСТ (String) перед отправкой в Telegram!
+    // Теперь Telegram API пропустит эту команду моментально, без зависаний!
     tg.sendData(JSON.stringify(webAppData));
     
-    // Закрываем мини-приложение на телефоне
     tg.close();
 }
 </script>
