@@ -74,32 +74,45 @@
 </div>
 
 <script>
-    // Инициализируем Telegram WebApp API
     const tg = window.Telegram.WebApp;
-tg.ready(); // ОБЯЗАТЕЛЬНО: Сообщаем Telegram, что приложение успешно загрузилось!
-tg.expand(); // Раскрываем приложение на весь экран телефона
+    tg.ready();
+    tg.expand();
 
-function sendData() {
-    const name = document.getElementById('name').value.trim();
-    const phone = document.getElementById('phone').value.trim();
+    function sendData() {
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
 
-    if (!name || !phone) {
-        alert('Пожалуйста, заполни все поля!');
-        return;
+        if (!name || !phone) {
+            alert('Пожалуйста, заполните все поля!');
+            return;
+        }
+
+        const cleanPhone = phone.replace(/\D/g, '');
+
+        
+        const n8nWebhookUrl = "https://rebirth-eliminate-residency.ngrok-free.dev/webhook-test/25151dc6-a513-4fed-97de-1c14ec2aec9f/webhook";
+
+        fetch(n8nWebhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                tg_id: tg.initDataUnsafe?.user?.id || "1710015849", 
+                name: name,
+                phone: cleanPhone
+            })
+        })
+        .then(response => {
+            // Как только n8n принял данные — закрываем мини-приложение со щелчком!
+            tg.close();
+        })
+        .catch(error => {
+            alert('Ошибка сети! Попробуйте еще раз.');
+            console.error(error);
+        });
     }
-
-    const cleanPhone = phone.replace(/\D/g, '');
-
-    const webAppData = {
-        name: name,
-        phone: cleanPhone
-    };
-
-    // Теперь Telegram API пропустит эту команду моментально, без зависаний!
-    tg.sendData(JSON.stringify(webAppData));
-    
-    tg.close();
-}
 </script>
+
 </body>
 </html>
