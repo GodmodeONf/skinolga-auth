@@ -78,28 +78,30 @@
     const tg = window.Telegram.WebApp;
     tg.expand(); // Раскрываем приложение на весь экран телефона
 
-    function sendData() {
-        const name = document.getElementById('name').value.trim();
-        const phone = document.getElementById('phone').value.trim();
+        function sendData() {
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
 
-        if (!name || !phone) {
-            alert('Пожалуйста, заполните все поля!');
-            return;
-        }
-
-        // Собираем чистый JSON-пакет данных
-        const webAppData = {
-            tg_id: tg.initDataUnsafe?.user?.id || "unknown",
-            name: name,
-            phone: phone
-        };
-
-        // Отправляем данные обратно в n8n через системный метод Telegram
-        tg.sendData(JSON.stringify(webAppData));
-        
-        // Закрываем мини-приложение на телефоне
-        tg.close();
+    if (!name || !phone) {
+        alert('Пожалуйста, заполните все поля!');
+        return;
     }
+
+    // Очищаем телефон от скобок и пробелов перед отправкой, оставляя только цифры
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    // Собираем чистую строку данных
+    const webAppData = {
+        name: name,
+        phone: cleanPhone
+    };
+
+    // Обязательно превращаем объект в ТЕКСТ (String) перед отправкой в Telegram!
+    tg.sendData(JSON.stringify(webAppData));
+    
+    // Закрываем мини-приложение на телефоне
+    tg.close();
+}
 </script>
 </body>
 </html>
