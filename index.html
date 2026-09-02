@@ -4,73 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Авторизация SkinOlga</title>
-    <!-- Подключаем официальный скрипт Telegram WebApp -->
     <script src="https://telegram.org"></script>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--tg-theme-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #000000);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 80vh;
         }
-        .form-container {
-            width: 100%;
-            max-width: 320px;
-            text-align: center;
-        }
+        .form-container { width: 100%; max-width: 320px; text-align: center; }
         h2 { margin-bottom: 10px; color: var(--tg-theme-button-color, #2481cc); }
         p { font-size: 14px; color: #888; margin-bottom: 25px; }
         .input-group { position: relative; margin-bottom: 20px; text-align: left; }
         label { display: block; font-size: 12px; margin-bottom: 5px; font-weight: bold; color: var(--tg-theme-hint-color, #999); }
         input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid var(--tg-theme-hint-color, #ccc);
-            border-radius: 8px;
-            box-sizing: border-box;
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
+            width: 100%; padding: 12px; font-size: 16px;
+            border: 1px solid var(--tg-theme-hint-color, #ccc); border-radius: 8px;
+            box-sizing: border-box; background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000);
         }
         input:focus { outline: none; border-color: var(--tg-theme-button-color, #2481cc); }
         .btn {
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
+            width: 100%; padding: 14px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px;
+            background-color: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #ffffff);
             cursor: pointer;
-            transition: background-color 0.2s;
         }
-        .btn:hover { opacity: 0.9; }
+        .error-msg { color: #e53935; font-size: 12px; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="form-container">
     <h2>Авторизация</h2>
-    <p>Пожалуйста, подтвердите свой профиль для доступа к системе SkinOlga</p>
+    <p>Подтвердите свой профиль для доступа к системе SkinOlga</p>
     
     <div class="input-group">
         <label for="name">Ваше имя</label>
-        <input type="text" id="name" placeholder="Иван" required>
+        <input type="text" id="name" placeholder="Иван">
+        <div id="name-error" class="error-msg">Пожалуйста, введите имя</div>
     </div>
 
     <div class="input-group">
         <label for="phone">Номер телефона</label>
-        <input type="tel" id="phone" placeholder="+7 (999) 999-99-99" required>
+        <input type="tel" id="phone" placeholder="+7 (999) 999-99-99">
+        <div id="phone-error" class="error-msg">Пожалуйста, введите корректный номер</div>
     </div>
 
-    <button class="btn" onclick="sendData()">Подтвердить профиль</button>
+    <button class="btn" id="submit-btn">Подтвердить профиль</button>
 </div>
 
 <script>
@@ -78,41 +59,41 @@
     tg.ready();
     tg.expand();
 
-    function sendData() {
-        const name = document.getElementById('name').value.trim();
-        const phone = document.getElementById('phone').value.trim();
+    document.getElementById('submit-btn').addEventListener('click', function() {
+        const nameInput = document.getElementById('name');
+        const phoneInput = document.getElementById('phone');
+        const nameError = document.getElementById('name-error');
+        const phoneError = document.getElementById('phone-error');
+        
+        let isValid = true;
 
-        if (!name || !phone) {
-            alert('Пожалуйста, заполните все поля!');
-            return;
+        // Сбрасываем старые ошибки, чтобы поля не блокировались
+        nameError.style.display = 'none';
+        phoneError.style.display = 'none';
+
+        if (!nameInput.value.trim()) {
+            nameError.style.display = 'block';
+            isValid = false;
         }
 
-        const cleanPhone = phone.replace(/\D/g, '');
+        const cleanPhone = phoneInput.value.replace(/\D/g, '');
+        if (cleanPhone.length < 10) {
+            phoneError.style.display = 'block';
+            isValid = false;
+        }
 
-        
-        const n8nWebhookUrl = "https://rebirth-eliminate-residency.ngrok-free.dev/webhook-test/25151dc6-a513-4fed-97de-1c14ec2aec9f/webhook";
+        // Если что-то не заполнено — СТОП. Скрипт не падает, интерфейс остается рабочим!
+        if (!isValid) return;
 
-        fetch(n8nWebhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                tg_id: tg.initDataUnsafe?.user?.id || "1710015849", 
-                name: name,
-                phone: cleanPhone
-            })
-        })
-        .then(response => {
-            // Как только n8n принял данные — закрываем мини-приложение со щелчком!
-            tg.close();
-        })
-        .catch(error => {
-            alert('Ошибка сети! Попробуйте еще раз.');
-            console.error(error);
-        });
-    }
+        // Отправляем чистый текст в Telegram API
+        const resultData = {
+            name: nameInput.value.trim(),
+            phone: cleanPhone
+        };
+
+        tg.sendData(JSON.stringify(resultData));
+        tg.close();
+    });
 </script>
-
 </body>
 </html>
