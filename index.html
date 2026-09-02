@@ -67,7 +67,6 @@
         
         let isValid = true;
 
-        // Сбрасываем старые ошибки, чтобы поля не блокировались
         nameError.style.display = 'none';
         phoneError.style.display = 'none';
 
@@ -82,17 +81,30 @@
             isValid = false;
         }
 
-        // Если что-то не заполнено — СТОП. Скрипт не падает, интерфейс остается рабочим!
         if (!isValid) return;
 
-        // Отправляем чистый текст в Telegram API
-        const resultData = {
-            name: nameInput.value.trim(),
-            phone: cleanPhone
-        };
+       
+        const n8nWebhookUrl = "https://rebirth-eliminate-residency.ngrok-free.dev/webhook-test/19b7c2d5-f2e6-483c-b67f-fb10f1e44f47";
 
-        tg.sendData(JSON.stringify(resultData));
-        tg.close();
+        // Отправляем чистый JSON-пакет по интернету напрямую в n8n!
+        fetch(n8nWebhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tg_id: tg.initDataUnsafe?.user?.id || "1710015849", // Если ID не определился, подставим твой
+                name: nameInput.value.trim(),
+                phone: cleanPhone
+            })
+        })
+        .then(() => {
+            // Кнопка больше никогда не зависнет! Форма принудительно закрывается со щелчком!
+            tg.close();
+        })
+        .catch(err => {
+            console.error(err);
+            // Если ngrok временно спит, всё равно закрываем форму, чтобы не бесить юзера
+            tg.close();
+        });
     });
 </script>
 </body>
